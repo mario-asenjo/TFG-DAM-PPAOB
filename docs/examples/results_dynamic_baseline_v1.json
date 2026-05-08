@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "profile": "DYNAMIC_BASELINE",
+  "metadata": {
+    "analysisId": "00000000-0000-0000-0000-000000000011",
+    "binaryId": "00000000-0000-0000-0000-000000000022",
+    "requestedProfile": "DYNAMIC_BASELINE",
+    "producer": "worker-dynamic",
+    "generatedAt": "2026-05-01T00:00:00Z"
+  },
+  "fileInfo": {
+    "binaryId": "00000000-0000-0000-0000-000000000022",
+    "originalName": "sample_runtime.elf",
+    "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "sizeBytes": 54321
+  },
+  "static": {},
+  "dynamic": {
+    "runtime": {
+      "durationMs": 182,
+      "exitCode": 0,
+      "timedOut": false
+    },
+    "policy": {
+      "name": "SECCOMP_BASELINE_V1",
+      "deniedCount": 0
+    },
+    "topSyscalls": [
+      {
+        "name": "read",
+        "number": 0,
+        "count": 12
+      }
+    ]
+  },
+  "signals": [],
+  "correlation": {
+    "version": "S09_CORR_V1",
+    "environmentProfile": "LINUX_SERVER",
+    "riskScore": 21,
+    "priority": "P3",
+    "procedures": [],
+    "relationships": [],
+    "topReasons": []
+  },
+  "artifacts": [],
+  "summary": {
+    "riskLevel": "LOW",
+    "findingsCount": 0,
+    "riskScore": 21,
+    "topSyscall": "read",
+    "exitCode": 0
+  },
+  "runtime": {
+    "durationMs": 182,
+    "exitCode": 0,
+    "timedOut": false
+  },
+  "policy": {
+    "name": "SECCOMP_BASELINE_V1",
+    "deniedCount": 0
+  },
+  "topSyscalls": [
+    {
+      "name": "read",
+      "number": 0,
+      "count": 12
+    }
+  ]
+}

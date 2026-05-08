@@ -1,0 +1,45 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:65432/ppaob}
+    username: ${DB_USER:ppaob}
+    password: ${DB_PASSWORD:ppaob_dev_password}
+  servlet:
+    multipart:
+      max-file-size: ${MAX_UPLOAD_FILE_SIZE:20MB}
+      max-request-size: ${MAX_UPLOAD_REQUEST_SIZE:20MB}
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+security:
+  jwt:
+    secret: ${JWT_SECRET:change-this-in-production-change-this-in-production}
+    ttl-minutes: ${JWT_TTL_MINUTES:15}
+  refresh:
+    ttl-days: ${REFRESH_TTL_DAYS:14}
+    cookie-name: ${REFRESH_COOKIE_NAME:ppaob_refresh}
+    cookie-secure: ${REFRESH_COOKIE_SECURE:false}
+    cookie-same-site: ${REFRESH_COOKIE_SAME_SITE:Lax}
+    cookie-path: ${REFRESH_COOKIE_PATH:/api/v1/auth}
+
+storage:
+  s3:
+    endpoint: ${S3_ENDPOINT:http://localhost:9000}
+    region: ${S3_REGION:us-east-1}
+    access-key: ${S3_ACCESS_KEY:minioadmin}
+    secret-key: ${S3_SECRET_KEY:minioadmin_dev_password}
+    bucket: ${S3_BUCKET:ppaob-binaries}
+    path-style-access: ${S3_PATH_STYLE:true}
+
+app:
+  runtime:
+    mode: ${APP_RUNTIME_MODE:dev}
+  upload:
+    max-bytes: ${APP_UPLOAD_MAX_BYTES:20971520}
+  audit:
+    system-user-email: ${APP_AUDIT_SYSTEM_USER_EMAIL:system@ppaob.local}
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}

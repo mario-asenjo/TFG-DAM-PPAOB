@@ -1,0 +1,77 @@
+{
+  "version": "S09_CORR_V3",
+  "environmentProfile": "CONTAINER_SERVICE",
+  "severityWeights": {
+    "HIGH": 11,
+    "MEDIUM": 6,
+    "LOW": 3
+  },
+  "riskThresholds": {
+    "high": 68,
+    "medium": 38
+  },
+  "priorityThresholds": {
+    "p1": 72,
+    "p2": 50
+  },
+  "procedureScoreStep": 5,
+  "scoreBonuses": {
+    "maxProcedureDivisor": 2,
+    "multiProcedure": 9,
+    "chainRule": 11,
+    "criticalProcedure": 10,
+    "criticalProcedureThreshold": 84
+  },
+  "procedureRules": [
+    {
+      "id": "PROC_COMMAND_EXEC",
+      "title": "Command execution path",
+      "baseScore": 70,
+      "signalKinds": ["command_execution_function", "shell_literal"],
+      "signalRelationType": "enables",
+      "rationale": "Command execution remains high risk in containers, especially with host mounts."
+    },
+    {
+      "id": "PROC_NETWORK_IO",
+      "title": "Network interaction path",
+      "baseScore": 62,
+      "signalKinds": ["network_function"],
+      "signalRelationType": "observed_in",
+      "rationale": "Network exposure still raises remote reachability for services in containers."
+    },
+    {
+      "id": "PROC_PRIVILEGED_RESOURCE_FLOW",
+      "title": "Privileged resource manipulation path",
+      "baseScore": 84,
+      "signalKinds": ["privilege_manipulation_function", "sensitive_path_literal"],
+      "signalRelationType": "amplifies",
+      "rationale": "Privilege and host-sensitive paths can break container isolation boundaries."
+    },
+    {
+      "id": "PROC_MEMORY_UNSAFE_HANDLING",
+      "title": "Unsafe memory/input handling path",
+      "baseScore": 50,
+      "signalKinds": ["unsafe_input_function", "unsafe_copy_function"],
+      "signalRelationType": "supports",
+      "rationale": "Unsafe parsing remains exploitable in long-running containerized services."
+    }
+  ],
+  "chainRules": [
+    {
+      "requires": ["PROC_NETWORK_IO", "PROC_COMMAND_EXEC"],
+      "fromProcedureId": "PROC_NETWORK_IO",
+      "toProcedureId": "PROC_COMMAND_EXEC",
+      "type": "chains_with",
+      "scoreBonus": 13,
+      "reason": "Network plus command execution can expose remote command paths in service containers."
+    },
+    {
+      "requires": ["PROC_MEMORY_UNSAFE_HANDLING", "PROC_COMMAND_EXEC"],
+      "fromProcedureId": "PROC_MEMORY_UNSAFE_HANDLING",
+      "toProcedureId": "PROC_COMMAND_EXEC",
+      "type": "amplifies",
+      "scoreBonus": 8,
+      "reason": "Unsafe memory/input paths can increase command-flow exploitability."
+    }
+  ]
+}

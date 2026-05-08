@@ -1,0 +1,112 @@
+[
+  {
+    "name": "linux_benign_no_signals",
+    "profile": "LINUX_SERVER",
+    "deploymentContext": {
+      "exposure": "INTERNAL",
+      "privilegeLevel": "USER",
+      "dataSensitivity": "LOW"
+    },
+    "observedRuns": 1,
+    "signals": [],
+    "expected": {
+      "priority": "P3",
+      "minRiskScore": 0,
+      "maxRiskScore": 20,
+      "minExploitabilityScore": 15,
+      "requiredProcedures": []
+    }
+  },
+  {
+    "name": "linux_network_plus_command_chain",
+    "profile": "LINUX_SERVER",
+    "deploymentContext": {
+      "exposure": "INTERNET",
+      "privilegeLevel": "PRIVILEGED",
+      "dataSensitivity": "HIGH"
+    },
+    "observedRuns": 3,
+    "signals": [
+      {
+        "id": "BEHAVIOR_SYSTEM",
+        "kind": "command_execution_function",
+        "severity": "HIGH",
+        "title": "Command execution API reference detected",
+        "evidence": {"token": "system"}
+      },
+      {
+        "id": "BEHAVIOR_SOCKET",
+        "kind": "network_function",
+        "severity": "MEDIUM",
+        "title": "Network socket API reference detected",
+        "evidence": {"token": "socket"}
+      }
+    ],
+    "expected": {
+      "priority": "P1",
+      "minRiskScore": 80,
+      "maxRiskScore": 100,
+      "minExploitabilityScore": 70,
+      "requiredProcedures": ["PROC_COMMAND_EXEC", "PROC_NETWORK_IO"]
+    }
+  },
+  {
+    "name": "container_privilege_sensitive_path",
+    "profile": "CONTAINER_SERVICE",
+    "deploymentContext": {
+      "exposure": "EXTERNAL",
+      "privilegeLevel": "ROOT",
+      "dataSensitivity": "HIGH"
+    },
+    "observedRuns": 2,
+    "signals": [
+      {
+        "id": "BEHAVIOR_SETUID",
+        "kind": "privilege_manipulation_function",
+        "severity": "HIGH",
+        "title": "Privilege change API reference detected",
+        "evidence": {"token": "setuid"}
+      },
+      {
+        "id": "LITERAL__VAR_RUN_DOCKER_SOCK",
+        "kind": "sensitive_path_literal",
+        "severity": "HIGH",
+        "title": "Container control socket literal detected",
+        "evidence": {"literal": "/var/run/docker.sock"}
+      }
+    ],
+    "expected": {
+      "priority": "P1",
+      "minRiskScore": 72,
+      "maxRiskScore": 100,
+      "minExploitabilityScore": 65,
+      "requiredProcedures": ["PROC_PRIVILEGED_RESOURCE_FLOW"]
+    }
+  },
+  {
+    "name": "linux_memory_unsafe_alone",
+    "profile": "LINUX_SERVER",
+    "deploymentContext": {
+      "exposure": "INTERNAL",
+      "privilegeLevel": "USER",
+      "dataSensitivity": "MEDIUM"
+    },
+    "observedRuns": 1,
+    "signals": [
+      {
+        "id": "UNSAFE_FUNCTION_STRCPY",
+        "kind": "unsafe_copy_function",
+        "severity": "HIGH",
+        "title": "Detected reference to strcpy",
+        "evidence": {"symbol": "strcpy"}
+      }
+    ],
+    "expected": {
+      "priority": "P3",
+      "minRiskScore": 30,
+      "maxRiskScore": 58,
+      "minExploitabilityScore": 30,
+      "requiredProcedures": ["PROC_MEMORY_UNSAFE_HANDLING"]
+    }
+  }
+]

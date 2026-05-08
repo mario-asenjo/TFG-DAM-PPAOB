@@ -1,0 +1,87 @@
+[
+  {
+    "name": "linux_benign_runtime",
+    "profile": "LINUX_SERVER",
+    "deploymentContext": {
+      "exposure": "INTERNAL",
+      "privilegeLevel": "USER",
+      "dataSensitivity": "LOW"
+    },
+    "observedRuns": 1,
+    "runtime": {"exitCode": 0, "timedOut": false, "durationMs": 12},
+    "policy": {"name": "SECCOMP_BASELINE_V1", "deniedCount": 0},
+    "topSyscalls": [{"name": "read", "number": 0, "count": 2}],
+    "signals": [],
+    "expected": {
+      "priority": "P3",
+      "minRiskScore": 0,
+      "maxRiskScore": 24,
+      "minExploitabilityScore": 18,
+      "requiredProcedures": []
+    }
+  },
+  {
+    "name": "linux_network_exec_policy_timeout_chain",
+    "profile": "LINUX_SERVER",
+    "deploymentContext": {
+      "exposure": "INTERNET",
+      "privilegeLevel": "PRIVILEGED",
+      "dataSensitivity": "HIGH"
+    },
+    "observedRuns": 4,
+    "runtime": {"exitCode": 124, "timedOut": true, "durationMs": 3000},
+    "policy": {"name": "SECCOMP_BASELINE_V1", "deniedCount": 2},
+    "topSyscalls": [
+      {"name": "execve", "number": 59, "count": 3},
+      {"name": "socket", "number": 41, "count": 5}
+    ],
+    "signals": [
+      {
+        "id": "DYN_TIMEOUT",
+        "kind": "EXECUTION_TIMEOUT",
+        "severity": "HIGH",
+        "title": "Execution exceeded configured timeout",
+        "evidence": {"durationMs": 3000}
+      },
+      {
+        "id": "DYN_SECCOMP_DENY",
+        "kind": "SECCOMP_POLICY_DENY",
+        "severity": "MEDIUM",
+        "title": "Execution attempted blocked syscall(s)",
+        "evidence": {"deniedCount": 2}
+      }
+    ],
+    "expected": {
+      "priority": "P1",
+      "minRiskScore": 85,
+      "maxRiskScore": 100,
+      "minExploitabilityScore": 75,
+      "requiredProcedures": [
+        "PROC_RUNTIME_COMMAND_EXEC",
+        "PROC_RUNTIME_NETWORK_FLOW",
+        "PROC_RUNTIME_POLICY_VIOLATION"
+      ]
+    }
+  },
+  {
+    "name": "container_privilege_flow_only",
+    "profile": "CONTAINER_SERVICE",
+    "deploymentContext": {
+      "exposure": "EXTERNAL",
+      "privilegeLevel": "ROOT",
+      "dataSensitivity": "HIGH"
+    },
+    "observedRuns": 2,
+    "runtime": {"exitCode": 0, "timedOut": false, "durationMs": 14},
+    "policy": {"name": "SECCOMP_BASELINE_V1", "deniedCount": 0},
+    "topSyscalls": [{"name": "setuid", "number": 105, "count": 1}],
+    "signals": [],
+    "expected": {
+      "priority": "P1",
+      "minRiskScore": 55,
+      "maxRiskScore": 90,
+      "minExploitabilityScore": 60,
+      "requiredProcedures": ["PROC_RUNTIME_PRIVILEGE_FLOW"]
+    }
+  }
+]

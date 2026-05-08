@@ -1,0 +1,77 @@
+{
+  "version": "S09_CORR_V3",
+  "environmentProfile": "LINUX_SERVER",
+  "severityWeights": {
+    "HIGH": 12,
+    "MEDIUM": 7,
+    "LOW": 3
+  },
+  "riskThresholds": {
+    "high": 70,
+    "medium": 40
+  },
+  "priorityThresholds": {
+    "p1": 75,
+    "p2": 52
+  },
+  "procedureScoreStep": 6,
+  "scoreBonuses": {
+    "maxProcedureDivisor": 2,
+    "multiProcedure": 10,
+    "chainRule": 10,
+    "criticalProcedure": 8,
+    "criticalProcedureThreshold": 86
+  },
+  "procedureRules": [
+    {
+      "id": "PROC_COMMAND_EXEC",
+      "title": "Command execution path",
+      "baseScore": 76,
+      "signalKinds": ["command_execution_function", "shell_literal"],
+      "signalRelationType": "enables",
+      "rationale": "Command/process execution primitives are high impact in Linux server contexts."
+    },
+    {
+      "id": "PROC_NETWORK_IO",
+      "title": "Network interaction path",
+      "baseScore": 58,
+      "signalKinds": ["network_function"],
+      "signalRelationType": "observed_in",
+      "rationale": "Network-capable binaries increase remote reachability."
+    },
+    {
+      "id": "PROC_PRIVILEGED_RESOURCE_FLOW",
+      "title": "Privileged resource manipulation path",
+      "baseScore": 82,
+      "signalKinds": ["privilege_manipulation_function", "sensitive_path_literal"],
+      "signalRelationType": "amplifies",
+      "rationale": "Privilege and sensitive resource indicators can directly impact system integrity."
+    },
+    {
+      "id": "PROC_MEMORY_UNSAFE_HANDLING",
+      "title": "Unsafe memory/input handling path",
+      "baseScore": 54,
+      "signalKinds": ["unsafe_input_function", "unsafe_copy_function"],
+      "signalRelationType": "supports",
+      "rationale": "Unsafe C patterns increase exploitability when chained with higher-impact behaviors."
+    }
+  ],
+  "chainRules": [
+    {
+      "requires": ["PROC_NETWORK_IO", "PROC_COMMAND_EXEC"],
+      "fromProcedureId": "PROC_NETWORK_IO",
+      "toProcedureId": "PROC_COMMAND_EXEC",
+      "type": "chains_with",
+      "scoreBonus": 12,
+      "reason": "Network plus command execution raises potential remote impact."
+    },
+    {
+      "requires": ["PROC_MEMORY_UNSAFE_HANDLING", "PROC_COMMAND_EXEC"],
+      "fromProcedureId": "PROC_MEMORY_UNSAFE_HANDLING",
+      "toProcedureId": "PROC_COMMAND_EXEC",
+      "type": "amplifies",
+      "scoreBonus": 8,
+      "reason": "Unsafe memory/input handling can increase command-path exploitability."
+    }
+  ]
+}

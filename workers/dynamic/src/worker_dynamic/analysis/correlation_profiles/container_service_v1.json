@@ -1,0 +1,87 @@
+{
+  "version": "S09_CORR_V3",
+  "environmentProfile": "CONTAINER_SERVICE",
+  "riskThresholds": {
+    "high": 70,
+    "medium": 40
+  },
+  "priorityThresholds": {
+    "p1": 75,
+    "p2": 51
+  },
+  "scoreBase": 10,
+  "signalWeight": 7,
+  "procedureScoreStep": 4,
+  "scoreBonuses": {
+    "timedOut": 10,
+    "policyDenied": 16,
+    "maxProcedureDivisor": 2,
+    "multiProcedure": 8,
+    "chainRule": 11,
+    "criticalProcedure": 10,
+    "criticalProcedureThreshold": 82,
+    "timedOutDeniedCombo": 7
+  },
+  "procedureRules": [
+    {
+      "id": "PROC_RUNTIME_COMMAND_EXEC",
+      "title": "Runtime command execution flow",
+      "type": "syscall_any",
+      "syscalls": ["execve", "execveat"],
+      "minMatches": 1,
+      "baseScore": 76,
+      "rationale": "Command execution in containers is high risk when paired with host mounts/capabilities."
+    },
+    {
+      "id": "PROC_RUNTIME_NETWORK_FLOW",
+      "title": "Runtime network interaction flow",
+      "type": "syscall_any",
+      "syscalls": ["socket", "connect", "bind", "listen", "accept", "sendto", "recvfrom"],
+      "minMatches": 1,
+      "baseScore": 70,
+      "rationale": "Network-facing behavior keeps remote attack surface active in service containers."
+    },
+    {
+      "id": "PROC_RUNTIME_PRIVILEGE_FLOW",
+      "title": "Runtime privilege/control flow",
+      "type": "syscall_any",
+      "syscalls": ["setuid", "setgid", "ptrace", "mount"],
+      "minMatches": 1,
+      "baseScore": 82,
+      "rationale": "Privilege/control syscalls can weaken container isolation boundaries."
+    },
+    {
+      "id": "PROC_RUNTIME_POLICY_VIOLATION",
+      "title": "Runtime policy violation flow",
+      "type": "policy_denied",
+      "minDeniedCount": 1,
+      "baseScore": 78,
+      "rationale": "Seccomp denials in containers are strong indicators of restricted risky behavior."
+    },
+    {
+      "id": "PROC_RUNTIME_TIMEOUT_FLOW",
+      "title": "Runtime persistent execution flow",
+      "type": "runtime_timeout",
+      "baseScore": 58,
+      "rationale": "Persistent runtime in containers may indicate stuck workers or stealth loops."
+    }
+  ],
+  "chainRules": [
+    {
+      "requires": ["PROC_RUNTIME_NETWORK_FLOW", "PROC_RUNTIME_COMMAND_EXEC"],
+      "fromProcedureId": "PROC_RUNTIME_NETWORK_FLOW",
+      "toProcedureId": "PROC_RUNTIME_COMMAND_EXEC",
+      "type": "chains_with",
+      "scoreBonus": 13,
+      "reason": "Network plus process execution can expose remote command pathways in services."
+    },
+    {
+      "requires": ["PROC_RUNTIME_POLICY_VIOLATION", "PROC_RUNTIME_COMMAND_EXEC"],
+      "fromProcedureId": "PROC_RUNTIME_POLICY_VIOLATION",
+      "toProcedureId": "PROC_RUNTIME_COMMAND_EXEC",
+      "type": "amplifies",
+      "scoreBonus": 10,
+      "reason": "Policy violations raise confidence on dangerous command runtime paths."
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+El sistema se divide en cuatro grandes bloques:
+1. Frontend Web.
+2. Backend API.
+3. Workers de análisis.
+4. Agente de análisis dinámico.
+
+---
+
+Componentes principales:
+1. Frontend Web:
+- Proporciona la interfaz de usuario.
+- Permite autenticación, carga de binarios y visualización de resultados.
+- No ejecuta análisis ni lógica sensible.
+- Consume exclusivamente la API Rest.
+Responsabilidades:
+- Experiencia e Interfaz de usuario.
+- Gestión de sesión.
+- Visualización y filtrado de datos.
+---
+2. Backend API:
+Actua como núcleo del sistema.
+Responsabilidades:
+- Autenticación y autorización de usuarios.
+- Orquestación del ciclo de análisis.
+- Gestión de metadatos y estados.
+- Persistencia de resultados.
+- Registro de eventos de auditoría.
+- Exposición de endpoints REST.
+Arquitectura Interna:
+- Dominio: reglas de negocio.
+- Aplicación: casos de uso.
+- Puertos: interfaces abstractas.
+- Adaptadores: base de datos, workers, render de informes.
+---
+3. Workers de análisis:
+Componentes especializados en ejecutar tareas de análisis.
+Responsabilidades:
+- Análisis estático del binario.
+- Ejecución del análisis dinámico mediante el agente.
+- Normalización de resultados.
+- Envío de evidencias al backend.
+Pueden ejecutarse:
+- En el mismo host (Docker compose).
+- Distribuidos (escalado futuro).
+---
+4. Agente de análisis dinámico:
+Herramienta de bajo nivel responsable de la instrumentación del binario durante su ejecución.
+Responsabilidades:
+- Interceptar syscalls.
+- Registrar accesos a recursos.
+- Ejecutar el binario bajo restricciones controladas.
+- Emitir eventos estructurados.
+Se utiliza cuando el análisis dinámico lo requiere, siempre bajo control del worker.
+
+---
+
+Flujo de ejecución simplificado:
+1. El usuario se autentica en la interfaz web.
+2. Se sube un binario y se solicita un análisis.
+3. El backend registra la solicitud y crea un identificador de análisis.
+4. Un worker recoge la tarea y ejecuta:
+- Análisis estático.
+- Análisis dinámico (si aplica).
+5. Los resultados se normalizan y almacenan.
+6. El backend calcula el score y genera el informe.
+7. El usuario visualiza y exporta los resultados.
+8. Todas las acciones quedan registradas en el sistema de auditoría.
+
+---
+
+Justificación arquitectónica:
+- Separación de responsabilidades: facilita mantenimiento y pruebas.
+- Escalabilidad horizontal: los análisis pueden distribuirse.
+- Seguridad: el frontend nunca ejecuta código sensible.
+- Extensibilidad: nuevos análisis pueden añadirse como plugins o nuevos workers.
+- Trazabilidad: cada acción queda registrada y asociada a un usuario.
+

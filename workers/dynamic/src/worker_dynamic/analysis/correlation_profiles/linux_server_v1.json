@@ -1,0 +1,87 @@
+{
+  "version": "S09_CORR_V3",
+  "environmentProfile": "LINUX_SERVER",
+  "riskThresholds": {
+    "high": 72,
+    "medium": 42
+  },
+  "priorityThresholds": {
+    "p1": 78,
+    "p2": 53
+  },
+  "scoreBase": 10,
+  "signalWeight": 8,
+  "procedureScoreStep": 4,
+  "scoreBonuses": {
+    "timedOut": 12,
+    "policyDenied": 14,
+    "maxProcedureDivisor": 2,
+    "multiProcedure": 8,
+    "chainRule": 10,
+    "criticalProcedure": 8,
+    "criticalProcedureThreshold": 84,
+    "timedOutDeniedCombo": 6
+  },
+  "procedureRules": [
+    {
+      "id": "PROC_RUNTIME_COMMAND_EXEC",
+      "title": "Runtime command execution flow",
+      "type": "syscall_any",
+      "syscalls": ["execve", "execveat"],
+      "minMatches": 1,
+      "baseScore": 82,
+      "rationale": "Runtime execution syscalls can execute attacker-controlled commands in server contexts."
+    },
+    {
+      "id": "PROC_RUNTIME_NETWORK_FLOW",
+      "title": "Runtime network interaction flow",
+      "type": "syscall_any",
+      "syscalls": ["socket", "connect", "bind", "listen", "accept", "sendto", "recvfrom"],
+      "minMatches": 1,
+      "baseScore": 68,
+      "rationale": "Observed network syscalls indicate remote reachability or data exfiltration vectors."
+    },
+    {
+      "id": "PROC_RUNTIME_PRIVILEGE_FLOW",
+      "title": "Runtime privilege/control flow",
+      "type": "syscall_any",
+      "syscalls": ["setuid", "setgid", "ptrace", "mount"],
+      "minMatches": 1,
+      "baseScore": 76,
+      "rationale": "Privilege and process-control syscalls can increase impact if abused."
+    },
+    {
+      "id": "PROC_RUNTIME_POLICY_VIOLATION",
+      "title": "Runtime policy violation flow",
+      "type": "policy_denied",
+      "minDeniedCount": 1,
+      "baseScore": 74,
+      "rationale": "Seccomp denials show attempted restricted behavior needing immediate review."
+    },
+    {
+      "id": "PROC_RUNTIME_TIMEOUT_FLOW",
+      "title": "Runtime persistent execution flow",
+      "type": "runtime_timeout",
+      "baseScore": 60,
+      "rationale": "Timeouts indicate long-lived behavior that may hide loops or persistence attempts."
+    }
+  ],
+  "chainRules": [
+    {
+      "requires": ["PROC_RUNTIME_NETWORK_FLOW", "PROC_RUNTIME_COMMAND_EXEC"],
+      "fromProcedureId": "PROC_RUNTIME_NETWORK_FLOW",
+      "toProcedureId": "PROC_RUNTIME_COMMAND_EXEC",
+      "type": "chains_with",
+      "scoreBonus": 12,
+      "reason": "Network plus process execution can expose remote command pathways."
+    },
+    {
+      "requires": ["PROC_RUNTIME_POLICY_VIOLATION", "PROC_RUNTIME_COMMAND_EXEC"],
+      "fromProcedureId": "PROC_RUNTIME_POLICY_VIOLATION",
+      "toProcedureId": "PROC_RUNTIME_COMMAND_EXEC",
+      "type": "amplifies",
+      "scoreBonus": 10,
+      "reason": "Restricted syscall attempts increase confidence of high-risk runtime behavior."
+    }
+  ]
+}

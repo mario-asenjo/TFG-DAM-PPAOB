@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "profile": "STATIC_BASELINE",
+  "metadata": {
+    "analysisId": "00000000-0000-0000-0000-000000000001",
+    "binaryId": "00000000-0000-0000-0000-000000000002",
+    "requestedProfile": "STATIC_BASELINE",
+    "producer": "worker-static",
+    "generatedAt": "2026-05-01T00:00:00Z"
+  },
+  "fileInfo": {
+    "binaryId": "00000000-0000-0000-0000-000000000002",
+    "originalName": "sample.elf",
+    "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "sizeBytes": 12345
+  },
+  "static": {
+    "elf": {
+      "isElf": true,
+      "class": "ELF64",
+      "endianness": "LITTLE_ENDIAN"
+    },
+    "sections": [],
+    "segments": [],
+    "dependencies": [],
+    "mitigations": {}
+  },
+  "dynamic": {},
+  "signals": [
+    {
+      "id": "UNSAFE_FUNCTION_STRCPY",
+      "kind": "UNSAFE_FUNCTION",
+      "severity": "HIGH",
+      "title": "Potential unsafe function usage",
+      "evidence": {
+        "function": "strcpy"
+      }
+    }
+  ],
+  "correlation": {
+    "version": "S09_CORR_V1",
+    "environmentProfile": "LINUX_SERVER",
+    "riskScore": 68,
+    "priority": "P2",
+    "procedures": [],
+    "relationships": [],
+    "topReasons": []
+  },
+  "artifacts": [],
+  "summary": {
+    "riskLevel": "MEDIUM",
+    "findingsCount": 1,
+    "riskScore": 68
+  },
+  "elfInfo": {
+    "isElf": true,
+    "class": "ELF64",
+    "endianness": "LITTLE_ENDIAN"
+  }
+}
